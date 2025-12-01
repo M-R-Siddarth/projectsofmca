@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Smart Email Database</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+}
+
+body {
+    height: 100vh;
+    background: linear-gradient(135deg, #bcfbff, #babef1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    width: 420px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px);
+    border-radius: 18px;
+    padding: 30px;
+    color: rgb(0, 0, 0);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    animation: fadeIn 1s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {opacity: 0; transform: translateY(30px);}
+    to {opacity: 1; transform: translateY(0);}
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    letter-spacing: 1px;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+    font-size: 15px;
+    margin-bottom: 15px;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    font-weight: bold;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    background: linear-gradient(to right, #00f2fe, #4facfe);
+    color: black;
+    transition: 0.3s ease;
+}
+
+button:hover {
+    transform: scale(1.05);
+}
+
+.status {
+    margin-top: 15px;
+    min-height: 25px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.success {
+    color: #006800;
+    animation: pop 0.3s ease;
+}
+
+.duplicate {
+    color: #ff0000;
+    animation: shake 0.3s ease;
+}
+
+@keyframes shake {
+    0% {transform: translateX(0);}
+    25% {transform: translateX(-5px);}
+    50% {transform: translateX(5px);}
+    75% {transform: translateX(-5px);}
+    100% {transform: translateX(0);}
+}
+
+.database-box {
+    margin-top: 20px;
+    background: rgba(255,255,255,0.1);
+    padding: 15px;
+    border-radius: 10px;
+    max-height: 210px;
+    overflow-y: auto;
+}
+
+.database-box h4 {
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.email-item {
+    padding: 5px;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    font-size: 14px;
+}
+
+.counter {
+    margin-top: 10px;
+    text-align: center;
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+.clear-btn {
+    margin-top: 10px;
+    background: #ff5e5e;
+    color: white;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>📧 Smart Email Database</h2>
+
+    <input type="email" id="emailInput" placeholder="Enter Email Address">
+
+    <button onclick="storeEmail()">Save Email</button>
+
+    <div class="status" id="message"></div>
+
+    <div class="database-box">
+        <h4>📂 Stored Emails</h4>
+        <div id="emailList"></div>
+    </div>
+
+    <div class="counter" id="counter"></div>
+
+    <button class="clear-btn" onclick="clearDatabase()">Clear Database</button>
+</div>
+
+<script>
+function storeEmail() {
+    let email = document.getElementById("emailInput").value.trim();
+    let message = document.getElementById("message");
+
+    if (email === "") {
+        message.innerHTML = "<span class='duplicate'>⚠️ Enter an email first</span>";
+        return;
+    }
+
+    // ✅ DATABASE
+    let storedEmails = JSON.parse(localStorage.getItem("emails")) || [];
+
+    // ✅ HASH TABLE
+    let hashTable = {};
+    storedEmails.forEach(e => hashTable[e] = true);
+
+    // ✅ DUPLICATE CHECK
+    if (hashTable[email]) {
+        message.innerHTML = `<span class="duplicate">❌ Duplicate Found: ${email}</span>`;
+    } else {
+        storedEmails.push(email);
+        localStorage.setItem("emails", JSON.stringify(storedEmails));
+        message.innerHTML = `<span class="success">✅ Stored Successfully</span>`;
+    }
+
+    document.getElementById("emailInput").value = "";
+    displayEmails();
+}
+
+function displayEmails() {
+    let list = document.getElementById("emailList");
+    let counter = document.getElementById("counter");
+
+    let storedEmails = JSON.parse(localStorage.getItem("emails")) || [];
+
+    list.innerHTML = "";
+    storedEmails.forEach(email => {
+        let div = document.createElement("div");
+        div.className = "email-item";
+        div.textContent = email;
+        list.appendChild(div);
+    });
+
+    counter.innerHTML = `📊 Total Stored Emails: ${storedEmails.length}`;
+}
+
+function clearDatabase() {
+    if (confirm("Are you sure you want to clear all stored emails?")) {
+        localStorage.removeItem("emails");
+        displayEmails();
+        document.getElementById("message").innerHTML = "<span class='success'>✅ Database Cleared</span>";
+    }
+}
+
+// Load existing emails when page loads
+displayEmails();
+</script>
+
+</body>
+</html>
